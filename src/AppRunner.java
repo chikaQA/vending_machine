@@ -58,27 +58,34 @@ public class AppRunner {
         print(" a - Пополнить баланс");
         showActions(products);
         print(" h - Выйти");
-        String action = fromConsole().substring(0, 1);
-        if ("a".equalsIgnoreCase(action)) {
+        String action = fromConsole();
+        if ("a".equalsIgnoreCase(action) && !action.isEmpty() && !action.isBlank()) {
             coinAcceptor.setAmount(coinAcceptor.getAmount() + 10);
             print("Вы пополнили баланс на 10");
             return;
         }
+        boolean notFound = false;
         try {
             for (int i = 0; i < products.size(); i++) {
                 if (products.get(i).getActionLetter().equals(ActionLetter.valueOf(action.toUpperCase()))) {
                     coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
                     print("Вы купили " + products.get(i).getName());
+                    notFound = true;
                     break;
                 }
+            }
+            if(!notFound&&!"h".equalsIgnoreCase(action)){
+                throw new ArithmeticException();
             }
         } catch (IllegalArgumentException e) {
             if ("h".equalsIgnoreCase(action)) {
                 isExit = true;
             } else {
-                print("Недопустимая буква. Попрбуйте еще раз.");
+                print("Недопустимая буква. Попробуйте еще раз.");
                 chooseAction(products);
             }
+        }catch (ArithmeticException e ){
+            print("У вас не достатчно денег. Пополните баланс и попробуйте еще раз");
         }
 
 
