@@ -1,5 +1,8 @@
+package run;
+
 import enums.ActionLetter;
 import model.*;
+import typePayment.CreditСard;
 import util.UniversalArray;
 import util.UniversalArrayImpl;
 
@@ -68,7 +71,9 @@ public class AppRunner {
         try {
             for (int i = 0; i < products.size(); i++) {
                 if (products.get(i).getActionLetter().equals(ActionLetter.valueOf(action.toUpperCase()))) {
-                    coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
+                    CreditСard creditСard = new CreditСard();
+                    creditСard.pay(products.get(i).getPrice());
+//                    coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
                     print("Вы купили " + products.get(i).getName());
                     notFound = true;
                     break;
@@ -107,7 +112,7 @@ public class AppRunner {
         }
     }
 
-    private void print(String msg) {
+    private static void print(String msg) {
         System.out.println(msg);
     }
 }
