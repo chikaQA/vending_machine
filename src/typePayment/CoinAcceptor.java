@@ -17,5 +17,4 @@ public class CoinAcceptor implements Payment {
     public void setAmount(int amount) {
         this.amount = amount;
     }
-
 }

@@ -17,8 +17,6 @@ public class AppRunner {
     private Payment[] payments;
     private String paymentName;
     private CreditCard creditCard;
-
-
     private static boolean isExit = false;
 
     private AppRunner() {
@@ -53,8 +51,6 @@ public class AppRunner {
         allowProducts.addAll(getAllowedProducts().toArray());
 
         chooseAction(allowProducts);
-
-
     }
 
     private UniversalArray<Product> getAllowedProducts() {
@@ -118,8 +114,6 @@ public class AppRunner {
         } catch (ArithmeticException e) {
             print("У вас не достатчно денег. Пополните баланс и попробуйте еще раз");
         }
-
-
     }
 
 
@@ -180,5 +174,4 @@ public class AppRunner {
     private static void print(String msg) {
         System.out.println(msg);
     }
-
 }

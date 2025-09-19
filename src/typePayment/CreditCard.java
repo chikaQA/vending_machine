@@ -11,11 +11,9 @@ public class CreditCard implements Payment {
     private int otp;
     private int amount;
 
-
     public CreditCard(int amount) {
         this.amount = amount;
     }
-
 
     public static void validateCardNumber(CreditCard creditCard) {
         while (creditCard.cardNumber == null) {
