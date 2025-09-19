@@ -1,8 +1,9 @@
-package run;
-
 import enums.ActionLetter;
 import model.*;
-import typePayment.CreditСard;
+import payment.Payment;
+import typePayment.Cash;
+import typePayment.CoinAcceptor;
+import typePayment.CreditCard;
 import util.UniversalArray;
 import util.UniversalArrayImpl;
 
@@ -12,7 +13,11 @@ public class AppRunner {
 
     private final UniversalArray<Product> products = new UniversalArrayImpl<>();
 
-    private final CoinAcceptor coinAcceptor;
+    private Payment coinAcceptor;
+    private Payment[] payments;
+    private String paymentName;
+    private CreditCard creditCard;
+
 
     private static boolean isExit = false;
 
@@ -25,7 +30,8 @@ public class AppRunner {
                 new Mars(ActionLetter.F, 80),
                 new Pistachios(ActionLetter.G, 130)
         });
-        coinAcceptor = new CoinAcceptor(100);
+        creditCard = new CreditCard(100);
+        payments = new Payment[]{creditCard, new Cash(100), new CoinAcceptor(100)};
     }
 
     public static void run() {
@@ -39,16 +45,21 @@ public class AppRunner {
         print("В автомате доступны:");
         showProducts(products);
 
-        print("Монет на сумму: " + coinAcceptor.getAmount());
+        coinAcceptor = choosePayment();
+
+        print(paymentName + " на сумму: " + coinAcceptor.getAmount());
 
         UniversalArray<Product> allowProducts = new UniversalArrayImpl<>();
         allowProducts.addAll(getAllowedProducts().toArray());
+
         chooseAction(allowProducts);
+
 
     }
 
     private UniversalArray<Product> getAllowedProducts() {
         UniversalArray<Product> allowProducts = new UniversalArrayImpl<>();
+
         for (int i = 0; i < products.size(); i++) {
             if (coinAcceptor.getAmount() >= products.get(i).getPrice()) {
                 allowProducts.add(products.get(i));
@@ -62,7 +73,7 @@ public class AppRunner {
         showActions(products);
         print(" h - Выйти");
         String action = fromConsole();
-        if ("a".equalsIgnoreCase(action) && !action.isEmpty() && !action.isBlank()) {
+        if (("1".equalsIgnoreCase(action) || "a".equalsIgnoreCase(action)) && !action.isEmpty() && !action.isBlank()) {
             coinAcceptor.setAmount(coinAcceptor.getAmount() + 10);
             print("Вы пополнили баланс на 10");
             return;
@@ -71,29 +82,79 @@ public class AppRunner {
         try {
             for (int i = 0; i < products.size(); i++) {
                 if (products.get(i).getActionLetter().equals(ActionLetter.valueOf(action.toUpperCase()))) {
-                    CreditСard creditСard = new CreditСard();
-                    creditСard.pay(products.get(i).getPrice());
-//                    coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
+                    if(coinAcceptor.equals(creditCard)){
+                        CreditCard.validateOTP(creditCard);
+                    }
+                    coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
                     print("Вы купили " + products.get(i).getName());
                     notFound = true;
                     break;
                 }
             }
-            if(!notFound&&!"h".equalsIgnoreCase(action)){
+            if (!notFound && !"h".equalsIgnoreCase(action)) {
                 throw new ArithmeticException();
             }
         } catch (IllegalArgumentException e) {
-            if ("h".equalsIgnoreCase(action)) {
+            if ("h".equalsIgnoreCase(action) || action.equals(String.valueOf(products.size() + 2))) {
                 isExit = true;
             } else {
-                print("Недопустимая буква. Попробуйте еще раз.");
-                chooseAction(products);
+                boolean comandByNumber = false;
+                    for (int i = 0; i < products.size(); i++) {
+                        if (action.equals(String.valueOf(i + 2))) {
+                            comandByNumber = true;
+                            coinAcceptor.setAmount(coinAcceptor.getAmount() - products.get(i).getPrice());
+                            print("Вы купили " + products.get(i).getName());
+                            break;
+                        }
+                }if(!comandByNumber){
+                    print("Недопустимая буква или цифра. Попробуйте еще раз.");
+                    chooseAction(products);
+                }
             }
-        }catch (ArithmeticException e ){
+        } catch (ArithmeticException e) {
             print("У вас не достатчно денег. Пополните баланс и попробуйте еще раз");
         }
 
 
+    }
+
+
+    private Payment choosePayment() {
+        print("Пожалуйста выберите способ оплаты: ");
+        System.out.printf("k - Кредитная карта%nt - Наличными%ns - Монетами%n");
+        Payment payment = null;
+        while (payment == null) {
+            String typePayment = fromConsole();
+            if (!typePayment.isEmpty() && !typePayment.isBlank()) {
+                if (typePayment.length() == 1) {
+                    switch (typePayment) {
+                        case "k", "1":
+                            payment = payments[0];
+                            CreditCard.validateCardNumber(creditCard);
+                            CreditCard.validateValidityPeriod(creditCard);
+                            CreditCard.validateCVV(creditCard);
+                            paymentName = "Кредитная карта";
+                            break;
+                        case "t", "2":
+                            payment = payments[1];
+                            paymentName = "Наличными";
+                            break;
+                        case "s", "3":
+                            payment = payments[2];
+                            paymentName = "Монета";
+                            break;
+                        default:
+                            print("Недопустимая буква или цифра. Попробуйте еще раз.");
+                            break;
+                    }
+                } else {
+                    print("Можно ввести только одну команду");
+                }
+            } else {
+                print("Поле не может быть пустым. Введите данные корректно");
+            }
+        }
+        return payment;
     }
 
     private void showActions(UniversalArray<Product> products) {
@@ -115,4 +176,5 @@ public class AppRunner {
     private static void print(String msg) {
         System.out.println(msg);
     }
+
 }
