@@ -92,7 +92,11 @@ public class AppRunner {
                 }
             }
             if (!notFound && !"h".equalsIgnoreCase(action)) {
-                throw new ArithmeticException();
+                if (products.size()==0&&"2".equals(action) ){
+                    isExit = true;
+                }else {
+                    throw new ArithmeticException();
+                }
             }
         } catch (IllegalArgumentException e) {
             if ("h".equalsIgnoreCase(action) || action.equals(String.valueOf(products.size() + 2))) {
